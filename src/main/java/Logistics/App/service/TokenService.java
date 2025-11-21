@@ -47,6 +47,7 @@ public class TokenService {
 
         existing.setRevoked(true);
         refreshTokenRepository.save(existing);
+        System.out.println("Where is conflict");
         return createRefreshToken(existing.getUser());
     }
 
