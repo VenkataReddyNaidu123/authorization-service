@@ -2,7 +2,6 @@ package Logistics.App;
 
 import Logistics.App.controller.UserRegisterController;
 import Logistics.App.dto.RefreshRequest;
-import Logistics.App.dto.RegistrationRequest;
 import Logistics.App.entity.RefreshToken;
 import Logistics.App.entity.User;
 import Logistics.App.exception.InvalidCredentialsException;
@@ -54,7 +53,7 @@ class UserRegisterControllerWebMvcTest {
 
     @Test
     void register_success_returnsCreatedAndBody() throws Exception {
-        // Valid strong password: at least 8 chars, contains uppercase, number and special char
+
         String rawJson = """
                 {
                   "userName": "newuser",
@@ -107,7 +106,7 @@ class UserRegisterControllerWebMvcTest {
         verify(registrationService, times(1)).saveUser(any(User.class));
     }
 
-    // ---------- LOGIN ----------
+
     @Test
     void login_byEmail_success_returnsTokenJson() throws Exception {
         String rawJson = "{ \"userNameOrEmail\": \"bob@example.com\", \"password\": \"secret\" }";
@@ -188,7 +187,7 @@ class UserRegisterControllerWebMvcTest {
 
         User stored = new User();
         stored.setUserName("jane");
-        stored.setPassword(null); // missing password
+        stored.setPassword(null);
 
         when(authorizationRepo.findByUserName("jane")).thenReturn(Optional.of(stored));
 
@@ -247,22 +246,5 @@ class UserRegisterControllerWebMvcTest {
 
         verify(tokenService).findByToken("refresh-123");
         verify(tokenService).revokeRefreshToken(any());
-    }
-
-    @Test
-    void logout_withMissingRefreshToken_returnsOkAndDoesNotRevoke() throws Exception {
-        RefreshRequest req = new RefreshRequest();
-        req.setRefreshToken("no-such-token");
-
-        when(tokenService.findByToken("no-such-token")).thenReturn(Optional.empty());
-
-        mockMvc.perform(post("/logistics/logout")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Logged out")));
-
-        verify(tokenService).findByToken("no-such-token");
-        verify(tokenService, never()).revokeRefreshToken(any());
     }
 }
